@@ -16,6 +16,6 @@ return {
     filetypes = {
       markdown = true,
       help = true,
-    },
-  },
+    }
+  }
 }
