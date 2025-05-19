@@ -3,3 +3,5 @@
 -- Add any additional options here
 --
 vim.opt.wrap = true
+
+vim.opt.clipboard = "unnamedplus"

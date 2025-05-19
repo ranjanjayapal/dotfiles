@@ -17,3 +17,13 @@ end, { desc = "Open Python Scratchpad" })
 vim.keymap.set("n", "<leader>se", function()
   vim.cmd("w !python") -- Write and execute the buffer with Python
 end, { desc = "Execute Python Scratchpad" })
+
+-- Keybinding to go to next or prev function start
+vim.keymap.set("n", "[[", "[m", { desc = "Go to previous function start" })
+vim.keymap.set("n", "]]", "]m", { desc = "Go to next function start" })
+
+vim.keymap.set("n", "[m", "[[", { desc = "Go to previous function start" })
+vim.keymap.set("n", "]m", "]]", { desc = "Go to next function start" })
+
+-- Remap "s" to substiture instead of find in file.
+vim.keymap.set("n", "s", "s", { desc = "Substitute", noremap = true })
