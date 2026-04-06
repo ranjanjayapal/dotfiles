@@ -80,6 +80,13 @@ return {
           open_in_finder(path)
         end
       end
+
+      opts.filesystem = opts.filesystem or {}
+      opts.filesystem.window = opts.filesystem.window or {}
+      opts.filesystem.window.mappings = opts.filesystem.window.mappings or {}
+      opts.filesystem.window.mappings["c"] = "copy_to_clipboard"
+      opts.filesystem.window.mappings["x"] = "cut_to_clipboard"
+      opts.filesystem.window.mappings["p"] = "paste_from_clipboard"
     end,
   },
 }
