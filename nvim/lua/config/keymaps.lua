@@ -440,3 +440,6 @@ end
 vim.keymap.set("n", "O", open_current_in_app, { desc = "Open in app" })
 vim.keymap.set("n", "<S-o>", open_current_in_app, { desc = "Open in app" })
 vim.keymap.set("n", "<leader>fo", open_current_in_finder, { desc = "Open folder in Finder" })
+
+vim.keymap.set("i", "jj", "<Esc>", { desc = "Exit insert mode" })
+vim.keymap.set("i", "jk", "<Esc>", { desc = "Exit insert mode" })

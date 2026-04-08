@@ -18,6 +18,17 @@ if vim.env.TERM_PROGRAM == "ghostty" then
   vim.env.SNACKS_GHOSTTY = "true"
 end
 
+local function prepend_path(path)
+  if vim.fn.isdirectory(path) == 1 and not vim.env.PATH:find(path, 1, true) then
+    vim.env.PATH = path .. ":" .. vim.env.PATH
+  end
+end
+
+-- Ensure Homebrew-installed CLI tools like `fzf` are available to Neovim
+-- even when it is launched from a GUI app without a shell-initialized PATH.
+prepend_path("/opt/homebrew/bin")
+prepend_path("/usr/local/bin")
+
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
