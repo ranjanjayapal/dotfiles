@@ -25,6 +25,56 @@ return {
         return node.path or node:get_id()
       end
 
+      local function copy_text(text, label)
+        if not text or text == "" then
+          vim.notify("No path found to copy", vim.log.levels.INFO, { title = "Neo-tree" })
+          return
+        end
+
+        vim.fn.setreg("+", text)
+        vim.fn.setreg('"', text)
+        vim.notify(label .. " copied", vim.log.levels.INFO, { title = "Neo-tree" })
+      end
+
+      local function relative_node_path(state, path)
+        local root = state and state.path
+        local normalized_path = vim.fs.normalize(path)
+
+        if root and root ~= "" then
+          local normalized_root = vim.fs.normalize(root)
+          if normalized_path == normalized_root then
+            return "."
+          end
+
+          local root_prefix = normalized_root
+          if root_prefix:sub(-1) ~= "/" then
+            root_prefix = root_prefix .. "/"
+          end
+
+          if normalized_path:sub(1, #root_prefix) == root_prefix then
+            return normalized_path:sub(#root_prefix + 1)
+          end
+        end
+
+        return vim.fn.fnamemodify(normalized_path, ":.")
+      end
+
+      local function copy_node_path(state, kind)
+        local path = node_path(state)
+        if not path then
+          copy_text(nil)
+          return
+        end
+
+        if kind == "relative" then
+          copy_text(relative_node_path(state, path), "Relative path")
+        elseif kind == "absolute" then
+          copy_text(vim.fs.normalize(path), "Absolute path")
+        elseif kind == "name" then
+          copy_text(vim.fn.fnamemodify(vim.fs.normalize(path), ":t"), "Name")
+        end
+      end
+
       local function open_in_app(path)
         local ext = vim.fn.fnamemodify(path, ":e"):lower()
         local app = app_by_ext[ext]
@@ -87,6 +137,24 @@ return {
       opts.filesystem.window.mappings["c"] = "copy_to_clipboard"
       opts.filesystem.window.mappings["x"] = "cut_to_clipboard"
       opts.filesystem.window.mappings["p"] = "paste_from_clipboard"
+      opts.filesystem.window.mappings["<leader>yr"] = {
+        function(state)
+          copy_node_path(state, "relative")
+        end,
+        desc = "Copy relative path",
+      }
+      opts.filesystem.window.mappings["<leader>ya"] = {
+        function(state)
+          copy_node_path(state, "absolute")
+        end,
+        desc = "Copy absolute path",
+      }
+      opts.filesystem.window.mappings["<leader>yn"] = {
+        function(state)
+          copy_node_path(state, "name")
+        end,
+        desc = "Copy name",
+      }
     end,
   },
 }
