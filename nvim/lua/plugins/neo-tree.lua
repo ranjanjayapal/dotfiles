@@ -75,6 +75,10 @@ return {
         end
       end
 
+      local function open_in_cloudcompare(path)
+        vim.fn.jobstart({ "open", "-a", "CloudCompare", path }, { detach = true })
+      end
+
       local function open_in_app(path)
         local ext = vim.fn.fnamemodify(path, ":e"):lower()
         local app = app_by_ext[ext]
@@ -113,6 +117,45 @@ return {
         vim.fn.jobstart({ "open", "-R", path }, { detach = true })
       end
 
+      local function zip_folder(path)
+        if vim.fn.isdirectory(path) ~= 1 then
+          vim.notify("Selected item is not a folder", vim.log.levels.INFO, { title = "Zip" })
+          return
+        end
+
+        if vim.fn.executable("ditto") ~= 1 then
+          vim.notify("ditto command not found", vim.log.levels.ERROR, { title = "Zip" })
+          return
+        end
+
+        local parent = vim.fs.dirname(path)
+        local name = vim.fn.fnamemodify(path, ":t")
+        local destination = vim.fs.joinpath(parent, name .. ".zip")
+
+        if vim.fn.filereadable(destination) == 1 then
+          local answer = vim.fn.confirm(destination .. " already exists. Overwrite?", "&Yes\n&No", 2)
+          if answer ~= 1 then
+            vim.notify("Zip cancelled", vim.log.levels.INFO, { title = "Zip" })
+            return
+          end
+          vim.fn.delete(destination)
+        end
+
+        vim.notify("Creating " .. vim.fn.fnamemodify(destination, ":t"), vim.log.levels.INFO, { title = "Zip" })
+        vim.fn.jobstart({ "ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", path, destination }, {
+          detach = false,
+          on_exit = function(_, code)
+            vim.schedule(function()
+              if code == 0 then
+                vim.notify("Created " .. destination, vim.log.levels.INFO, { title = "Zip" })
+              else
+                vim.notify("Failed to create zip", vim.log.levels.ERROR, { title = "Zip" })
+              end
+            end)
+          end,
+        })
+      end
+
       opts.window = opts.window or {}
       opts.window.mappings = opts.window.mappings or {}
 
@@ -124,10 +167,22 @@ return {
       end
 
       opts.window.mappings["<S-o>"] = opts.window.mappings["O"]
+      opts.window.mappings["<leader>oc"] = function(state)
+        local path = node_path(state)
+        if path then
+          open_in_cloudcompare(path)
+        end
+      end
       opts.window.mappings["<leader>fo"] = function(state)
         local path = node_path(state)
         if path then
           open_in_finder(path)
+        end
+      end
+      opts.window.mappings["<leader>fz"] = function(state)
+        local path = node_path(state)
+        if path then
+          zip_folder(path)
         end
       end
 

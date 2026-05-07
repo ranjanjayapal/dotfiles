@@ -383,6 +383,10 @@ local function resolve_generic_path()
   return resolve_candidate(path)
 end
 
+local function open_in_cloudcompare(path)
+  vim.fn.jobstart({ "open", "-a", "CloudCompare", path }, { detach = true })
+end
+
 local function open_in_app(path)
   local ext = vim.fn.fnamemodify(path, ":e"):lower()
   local app = app_by_ext[ext]
@@ -427,6 +431,16 @@ local function open_current_in_app()
   open_in_app(path)
 end
 
+local function open_current_in_cloudcompare()
+  local path = resolve_generic_path()
+  if not path then
+    vim.notify("No file found to open in CloudCompare", vim.log.levels.INFO, { title = "CloudCompare" })
+    return
+  end
+
+  open_in_cloudcompare(path)
+end
+
 local function open_current_in_finder()
   local path = resolve_generic_path()
   if not path then
@@ -439,6 +453,7 @@ end
 
 vim.keymap.set("n", "O", open_current_in_app, { desc = "Open in app" })
 vim.keymap.set("n", "<S-o>", open_current_in_app, { desc = "Open in app" })
+vim.keymap.set("n", "<leader>oc", open_current_in_cloudcompare, { desc = "Open in CloudCompare" })
 vim.keymap.set("n", "<leader>fo", open_current_in_finder, { desc = "Open folder in Finder" })
 
 vim.keymap.set("i", "jj", "<Esc>", { desc = "Exit insert mode" })
